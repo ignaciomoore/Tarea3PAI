@@ -4,13 +4,13 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('../images/stitching/caso_3/3a.jpg')
+img = cv2.imread('casos/caso_1/1a.jpg')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 sift = cv2.xfeatures2d.SIFT_create(nOctaveLayers=6, sigma=1.6)
 kp = sift.detect(gray)
 kp, des = sift.compute(gray, kp)
 
-img_2 = cv2.imread('../images/stitching/caso_3/3b.jpg')
+img_2 = cv2.imread('casos/caso_1/1b.jpg')
 gray_2 = cv2.cvtColor(img_2, cv2.COLOR_BGR2GRAY)
 kp_2 = sift.detect(gray_2)
 kp_2, des_2 = sift.compute(gray_2, kp_2)
