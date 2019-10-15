@@ -4,14 +4,15 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('casos/caso_1/1a.jpg')
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+img_a = cv2.imread('casos/caso_1/1a.jpg')
+gray = cv2.cvtColor(img_a, cv2.COLOR_BGR2GRAY)
 sift = cv2.xfeatures2d.SIFT_create(nOctaveLayers=6, sigma=1.6)
+print(type(sift))
 kp = sift.detect(gray)
 kp, des = sift.compute(gray, kp)
 
-img_2 = cv2.imread('casos/caso_1/1b.jpg')
-gray_2 = cv2.cvtColor(img_2, cv2.COLOR_BGR2GRAY)
+img_b = cv2.imread('casos/caso_1/1b.jpg')
+gray_2 = cv2.cvtColor(img_b, cv2.COLOR_BGR2GRAY)
 kp_2 = sift.detect(gray_2)
 kp_2, des_2 = sift.compute(gray_2, kp_2)
 
@@ -28,13 +29,13 @@ if len(good) > 4:
     src_pts = np.float32([kp[m.queryIdx].pt for m in good]).reshape(-1, 2)
     dst_pts = np.float32([kp_2[m.trainIdx].pt for m in good]).reshape(-1, 2)
 
-    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 2.0)
+    M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 2.0)    #    Implement bilinear interpolation
     matchesMask = mask.ravel().tolist()
 else:
     matchesMask = None
 
 # Aquí, matchesMask contiene las correspondencias
-img3 = cv2.drawMatches(img, kp, img_2, kp_2, good, None, flags=2, matchesMask=matchesMask)
+final_image = cv2.drawMatches(img_a, kp, img_b, kp_2, good, None, flags=2, matchesMask=matchesMask)
 
-cv2.imshow("matches", img3)
+cv2.imshow("matches", final_image)
 cv2.waitKey()
