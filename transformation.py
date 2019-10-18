@@ -1,3 +1,4 @@
+import math
 
 import numpy as np
 
@@ -13,7 +14,15 @@ def getYPrimeEcuation(x, y, xPrime, yPrime):
     return [0,0,0,x,y,1,-(x*yPrime),-(y*yPrime)]
 
 def findTransformation(xSource, ySource, xDestination, yDestination):   #  4 OR MORE POINTS
+    """
+Finds the transformation matrix, [[a,b,c],[d,e,f],[g,h,1]]
 
+    :param xSource: x values of 4 or more source points
+    :param ySource: y values of 4 or more source points
+    :param xDestination: x values of 4 or more destination points
+    :param yDestination: y values of 4 or more destination points
+    :return: The matrix as is shown above
+    """
     ecuationMatrix = []
     destinationPointValues = []
 
@@ -28,7 +37,7 @@ def findTransformation(xSource, ySource, xDestination, yDestination):   #  4 OR 
                        [destinationPointValues[4]],[destinationPointValues[5]],[destinationPointValues[6]],[destinationPointValues[7]]])
 
     if (abs(0 - np.linalg.det(newEM)) <= 0.0001):
-        return 0
+        return [[0,0,0],[0,0,0],[0,0,0]]
     else:
         variables = np.linalg.solve(newEM, newDPV)
         variables = np.append(variables, 1)
@@ -38,11 +47,21 @@ def findTransformation(xSource, ySource, xDestination, yDestination):   #  4 OR 
         return transformationMatrix
 
 def findInliers(calculated, original, maxDistance):
+    """
+Finds the amount of inliers between two group of points
 
+    :param calculated: The calculated group of points   a[[x,y], ...]
+    :param original: The original group of points       b[[x,y], ...]
+    :param maxDistance: The maximum distance between two points
+    :return: the amount of pair of points whose distance is less than maxDistance
+    """
     inliers = 0
 
     for i in range(len(calculated)):
-        if (np.linalg.norm(original[i], calculated[i]) <= maxDistance):
+        o = original[i]
+        c = calculated[i]
+        distance = calculateDistance(o,c)
+        if (distance <= maxDistance):
             inliers += 1
 
     return inliers
@@ -74,6 +93,14 @@ Does the bilinear interpolation of the point p
     div = dx * dy
 
     return float((np.matmul(aa, np.matmul(points, bb)))/float(div))
+
+def calculateDistance(a,b):
+    x1 = a[0]
+    y1 = a[1]
+    x2 = b[0]
+    y2 = b[1]
+
+    return math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
 
 if __name__ == '__main__':

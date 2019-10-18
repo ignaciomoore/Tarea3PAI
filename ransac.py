@@ -1,6 +1,7 @@
 from typing import List, Any
 
 import numpy as np
+import random
 
 from transformation import findTransformation, findInliers, deleteArray
 
@@ -11,6 +12,11 @@ def ransac(P, Q, epsilon, iterations):
     qCopy = Q.copy()
 
     size = len(pCopy)
+    indexShuffle = []
+    for i in range(len(P)):
+        indexShuffle.append(i)
+    random.shuffle(indexShuffle)
+
     subP = []
     subQ = []
     arrayIndex = 0
@@ -21,10 +27,12 @@ def ransac(P, Q, epsilon, iterations):
     for w in range(iterations):
         for subIndex in range(4):
             arrayIndex = np.random.randint(size - subIndex)
-            subP.append(pCopy[arrayIndex])
-            subQ.append(qCopy[arrayIndex])
-            pCopy = pCopy[:arrayIndex] + pCopy[arrayIndex+1 :]# deleteArray(pCopy, arrayIndex)
-            qCopy = qCopy[:arrayIndex] + qCopy[arrayIndex+1 :]# deleteArray(qCopy, arrayIndex)
+            subP.append(pCopy[indexShuffle[subIndex]])
+            subQ.append(qCopy[indexShuffle[subIndex]])
+            #pCopy = pCopy[:arrayIndex] + pCopy[arrayIndex+1 :]
+            #del pCopy[arrayIndex]
+            #qCopy = qCopy[:arrayIndex] + qCopy[arrayIndex+1 :]
+            #del qCopy[arrayIndex]
 
         xSubP = [subP[0][0],subP[1][0],subP[2][0],subP[3][0]]
         ySubP = [subP[0][1],subP[1][1],subP[2][1],subP[3][1]]
@@ -33,15 +41,19 @@ def ransac(P, Q, epsilon, iterations):
 
         inverseTransfromation = findTransformation(xSubQ, ySubQ, xSubP, ySubP)
 
-        if (inverseTransfromation == 0):
+        if (inverseTransfromation.all() == 0):
             print("Inverse Matrix not available")
         else:
             calculatedSourceP = []
 
             for i in range(len(Q)):
-                calculatedSourceP.append(np.matmul(inverseTransfromation, np.array([[Q[i][0]],[Q[i][1]],[1]])))
+                aux = np.matmul(inverseTransfromation, np.array([[Q[i][0]],[Q[i][1]],[1]]))
+                x = aux[0][0]
+                y = aux[1][0]
+                aux = [x,y]
+                calculatedSourceP.append(aux[:2])
 
-            inliers = findInliers(calculatedSourceP, P, epsilon)
+            inliers = findInliers(np.array(calculatedSourceP), P, epsilon)
 
         percentage = (inliers*100)/len(P)
 
