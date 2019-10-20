@@ -36,7 +36,7 @@ Finds the transformation matrix, [[a,b,c],[d,e,f],[g,h,1]]
     newDPV = np.array([[destinationPointValues[0]],[destinationPointValues[1]],[destinationPointValues[2]],[destinationPointValues[3]],
                        [destinationPointValues[4]],[destinationPointValues[5]],[destinationPointValues[6]],[destinationPointValues[7]]])
 
-    if (abs(0 - np.linalg.det(newEM)) <= 0.0001):
+    if (np.allclose(0, np.linalg.det(newEM))): # abs(0 - np.linalg.det(newEM)) <= 0.0001):
         return [[0,0,0],[0,0,0],[0,0,0]]
     else:
         variables = np.linalg.solve(newEM, newDPV)
@@ -65,6 +65,31 @@ Finds the amount of inliers between two group of points
             inliers += 1
 
     return inliers
+
+def getPanoramicImageSize(image_a, image_b, transformationMatrix):
+
+    tlA = (0,0)
+    cTlB = np.matmul(transformationMatrix, np.array([[0],[0],[1]]))
+    tlB = (cTlB[0][0], cTlB[1][0])
+    trA = (0,image_a.shape[1])
+    cTrB = np.matmul(transformationMatrix, np.array([[0], [image_b.shape[1]], [1]]))
+    trB = (cTrB[0][0], cTrB[1][0])
+    blA = (image_a.shape[0], 0)
+    cBlB = np.matmul(transformationMatrix, np.array([[image_b.shape[0]], [0], [1]]))
+    blB = (cBlB[0][0], cBlB[1][0])
+    brA = image_a.shape
+    cBrB = np.matmul(transformationMatrix, np.array([[image_b.shape[0]],[image_b.shape[1]],[1]]))
+    brB = (cBrB[0][0], cBrB[1][0])
+
+    top = min(tlA[0], tlB[0], trA[0], trB[0])
+    bottom = max(blA[0], blB[0], brA[0], brB[0])
+    left = min(blA[1], blB[1], tlA[1], tlB[1])
+    right = max(brA[1], brB[1], trA[1], trB[1])
+
+    dah = abs(tlA[0] - top)
+    daw = abs(tlA[1] - left)
+
+    return (abs(bottom - top), abs(right - left), dah, daw)
 
 def bilinear_interpolation(tl, tr, bl, br, p, Ptl, Ptr, Pbl, Pbr):
     """

@@ -19,27 +19,22 @@ def ransac(P, Q, epsilon, iterations):
 
     subP = []
     subQ = []
-    arrayIndex = 0
 
-    bestTransformation = 0
+    bestTransformation = [[0,0,0],[0,0,0],[0,0,0]]
     bestTransformationPercentage = 0
 
     for w in range(iterations):
         for subIndex in range(4):
-            arrayIndex = np.random.randint(size - subIndex)
             subP.append(pCopy[indexShuffle[subIndex]])
             subQ.append(qCopy[indexShuffle[subIndex]])
-            #pCopy = pCopy[:arrayIndex] + pCopy[arrayIndex+1 :]
-            #del pCopy[arrayIndex]
-            #qCopy = qCopy[:arrayIndex] + qCopy[arrayIndex+1 :]
-            #del qCopy[arrayIndex]
 
-        xSubP = [subP[0][0],subP[1][0],subP[2][0],subP[3][0]]
-        ySubP = [subP[0][1],subP[1][1],subP[2][1],subP[3][1]]
-        xSubQ = [subQ[0][0],subQ[1][0],subQ[2][0],subQ[3][0]]
-        ySubQ = [subQ[0][1],subQ[1][1],subQ[2][1],subQ[3][1]]
+        # x = j, y = i
+        xSubP = [subP[0][1], subP[1][1], subP[2][1], subP[3][1]] # j
+        ySubP = [subP[0][0], subP[1][0], subP[2][0], subP[3][0]] # i
+        xSubQ = [subQ[0][1], subQ[1][1], subQ[2][1], subQ[3][1]]
+        ySubQ = [subQ[0][0], subQ[1][0], subQ[2][0], subQ[3][0]]
 
-        inverseTransfromation = findTransformation(xSubQ, ySubQ, xSubP, ySubP)
+        inverseTransfromation = findTransformation(xSubQ, ySubQ, xSubP, ySubP) # use like [[j],[i],[z]]
 
         if (inverseTransfromation.all() == 0):
             print("Inverse Matrix not available")
